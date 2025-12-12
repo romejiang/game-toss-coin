@@ -7,9 +7,6 @@ export class Start extends Phaser.Scene {
 
     preload() {
         // 加载金币图片资源
-        this.load.image('silver_coin', 'assets/silver_coin.png');
-        this.load.image('gold_coin', 'assets/gold_coin.png');
-        this.load.image('diamond_coin', 'assets/diamond_coin.png');
         this.load.image('tail', 'assets/tail.png'); // 加载背景瓦块
 
         // 加载金币动画序列帧 (428x428)
@@ -20,6 +17,7 @@ export class Start extends Phaser.Scene {
 
         // 加载音效
         this.load.audio('coin_sfx', 'assets/coin.wav');
+        this.load.audio('drop_sfx', 'assets/drop.wav');
     }
 
     create() {
@@ -70,6 +68,9 @@ export class Start extends Phaser.Scene {
             frameRate: 16,
             repeat: -1
         });
+
+        // 1. 默认开局生成一个银币 (不消耗积分)
+        this.spawnCoin(GameConfig.CoinTypes.SILVER, 'sprite_silver', true);
     }
 
     /**
@@ -200,8 +201,9 @@ export class Start extends Phaser.Scene {
      * 在桌面随机位置生成金币
      * @param {string} type 金币类型
      * @param {string} texture 纹理
+     * @param {boolean} isInitial 是否是初始生成的 (不播放掉落音效)
      */
-    spawnCoin(type, texture) {
+    spawnCoin(type, texture, isInitial = false) {
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
         const barHeight = 100;
@@ -229,8 +231,13 @@ export class Start extends Phaser.Scene {
 
         if (overlaps) {
             console.log("无法生成金币，空间不足");
-            // 可以添加一个提示或者返还积分，这里简单处理不生成
-            this.updateScore(GameConfig.Prices[type]); // 返还积分
+            // 4. 空间不足时，轻微抖动屏幕
+            this.cameras.main.shake(200, 0.005);
+
+            // 返还积分 (如果是初始生成则不需要)
+            if (!isInitial) {
+                this.updateScore(GameConfig.Prices[type]);
+            }
             return;
         }
 
@@ -249,6 +256,11 @@ export class Start extends Phaser.Scene {
         coin.coinValue = GameConfig.Values[type];
 
         this.coins.push(coin);
+
+        // 3. 播放掉落音效 (非初始生成)
+        if (!isInitial) {
+            this.sound.play('drop_sfx');
+        }
     }
 
     /**

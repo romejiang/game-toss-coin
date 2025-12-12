@@ -25,7 +25,7 @@ export const GameConfig = {
     },
 
     // 初始化积分 (用于测试)
-    InitialScore: 200,
+    InitialScore: 100,
 
     // 桌面颜色
     TableColor: 0x4488FF // 亮一点的蓝色
