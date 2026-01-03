@@ -17,3 +17,5 @@ COPYFILE_DISABLE=1 tar \
 scp phaser01.tar.gz root@yang:/opt/games/phaser01/
 
 ssh root@yang "cd /opt/games/phaser01 && tar -zxvf phaser01.tar.gz"
+
+rm -rf phaser01.tar.gz
